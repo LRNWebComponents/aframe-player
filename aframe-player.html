@@ -1,4 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="aframe-aframe.html">
+<link rel="import" href="aframe-arjs.html">
 
 <!--
 `aframe-player`
@@ -12,9 +14,15 @@ A LRN element
     <style>
       :host {
         display: block;
+        position: relative;
+        height: 100vh;
       }
     </style>
-    <h2>[[title]]</h2>
+      <a-scene embedded arjs>
+        <a-entity id="entity" gltf-model$="[[file]]" position="0 0 0"></a-entity>
+        <a-sky color="#ECECEC"></a-sky>
+        <a-marker-camera preset='hiro'></a-marker-camera>
+      </a-scene>
   </template>
 
   <script>
@@ -23,11 +31,54 @@ A LRN element
       is: 'aframe-player',
 
       properties: {
-        title: {
+        file: {
           type: String,
-          value: 'aframe-player',
+          value: '',
         },
+        ar: {
+          type: Boolean,
+          value: false,
+          observer: '_arChanged'
+        },
+        x: {
+          type: String,
+          value: '0'
+        },
+        y: {
+          type: String,
+          value: '0'
+        },
+        z: {
+          type: String,
+          value: '0'
+        },
+        position: {
+          type: String,
+          computed: '_computePosition(x, y, z)',
+          observer: '_positionChanged'
+        }
       },
+      attached: function () {
+        this.__ready = false;
+      },
+      _computePosition: function (x, y, z) {
+        return {
+          x: x,
+          y: y,
+          z: z
+        }
+      },
+      _positionChanged: function (position) {
+          this.$$('#entity').setAttribute('position', position);
+          console.log(this.$$('#entity'));
+      },
+      _arChanged: function (newValue, oldValue) {
+      },
+      ready: function () {
+        // this.importHref(this.resolveUrl('aframe-aframe.html'));
+        // this.importHref(this.resolveUrl('aframe-arjs.html'));
+        this.__ready = true;
+      }
 
     });
   </script>
