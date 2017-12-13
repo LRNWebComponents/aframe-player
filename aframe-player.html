@@ -1,7 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../hax-body-behaviors/hax-body-behaviors.html">
+<link rel="import" href="../schema-behaviors/schema-behaviors.html">
 <link rel="import" href="aframe-aframe.html">
-<link rel="import" href="aframe-arjs.html">
+<!--<link rel="import" href="aframe-arjs.html">-->
 
 <!--
 `aframe-player`
@@ -16,10 +17,9 @@ A LRN element
       :host {
         display: block;
         position: relative;
-        height: 100vh;
       }
     </style>
-      <a-scene embedded arjs="[[ar]]">
+      <a-scene embedded arjs="[[ar]]" style$="height:[[height]];width:[[width]];">
         <a-entity id="entity" gltf-model$="[[source]]" position="0 0 0"></a-entity>
         <a-sky color$="[[skyColor]]"></a-sky>
         <a-marker-camera preset='hiro'></a-marker-camera>
@@ -30,7 +30,7 @@ A LRN element
     Polymer({
 
       is: 'aframe-player',
-      behaviors: [HAXBehaviors.PropertiesBehaviors],
+      behaviors: [HAXBehaviors.PropertiesBehaviors, SchemaBehaviors.Schema],
       properties: {
         /**
          * Source to reference for the 3D object
@@ -40,11 +40,25 @@ A LRN element
           value: '',
         },
         /**
+         * height of the element
+         */
+        height: {
+          type: String,
+          value: '480px',
+        },
+        /**
+         * width of the element
+         */
+        width: {
+          type: String,
+          value: '640px',
+        },
+        /**
          * Color of the sky / background.
          */
         skyColor: {
           type: String,
-          value: '#ECECEC',
+          value: '#DCDCDC',
         },
         /**
          * If this is for augmented reality or not.
@@ -79,7 +93,7 @@ A LRN element
          */
         position: {
           type: Object,
-          computed: '_computePosition(x, y, z)',
+          computed: '_computePosition(x, y, z,width,height)',
           observer: '_positionChanged'
         }
       },
@@ -87,63 +101,102 @@ A LRN element
        * Ready.
        */
       ready: function() {
-        // Establish hax properties if they exist
         let props = {
-          'canScale': true,
-          'canPosition': true,
-          'settings': [
-            {
-              'property': 'source',
-              'title': 'Source',
-              'description': 'The URL for this AR file.',
-              'inputMethod': 'textfield',
-              'type': 'bar',
-              'icon': 'link',
-              'required': true,
-            },
-            {
-              'property': 'x',
-              'title': 'X',
-              'description': 'X position of the element in AR.',
-              'inputMethod': 'textfield',
-              'type': 'bar',
-              'icon': 'communication:location',
-              'required': true,
-            },
-            {
-              'property': 'y',
-              'title': 'Y',
-              'description': 'Y position of the element in AR.',
-              'inputMethod': 'textfield',
-              'type': 'bar',
-              'icon': 'communication:location',
-              'required': true,
-            },
-            {
-              'property': 'z',
-              'title': 'Z',
-              'description': 'Z position of the element in AR.',
-              'inputMethod': 'textfield',
-              'type': 'bar',
-              'icon': 'communication:location',
-              'required': true,
-            },
-            {
-              'property': 'skyColor',
-              'title': 'Sky color',
-              'description': 'Select the color of the sky in the scene.',
-              'inputMethod': 'colorpicker',
-              'type': 'bar',
-              'icon': 'editor:format-color-fill',
+          'canScale': false,
+          'canPosition': false,
+          'canEditSource': false,
+          'gizmo': {
+            'title': '3D player',
+            'description': 'A 3D file / augmented reality player.',
+            'icon': 'av:play-circle-filled',
+            'color': 'amber',
+            'groups': ['3D', 'Augmented reality'],
+            'handles': [
+              {
+                'type': 'other',
+                'url': 'source'
+              }
+            ],
+            'meta': {
+              'author': 'LRNWebComponents'
             }
-          ]
+          },
+          'settings': {
+            'quick': [
+              {
+                'property': 'height',
+                'title': 'height',
+                'description': 'height of the object',
+                'inputMethod': 'textfield',
+                'type': 'bar',
+                'icon': 'image:photo-size-select-small',
+                'required': true,
+              },
+              {
+                'property': 'width',
+                'title': 'Width',
+                'description': 'Width of the object',
+                'inputMethod': 'textfield',
+                'type': 'bar',
+                'icon': 'image:straighten',
+                'required': true,
+              },
+            ],
+            'configure': [
+              {
+                'property': 'source',
+                'title': 'Source',
+                'description': 'The URL for this AR file.',
+                'inputMethod': 'textfield',
+                'type': 'bar',
+                'icon': 'link',
+                'required': true,
+              },
+              {
+                'property': 'x',
+                'title': 'X',
+                'description': 'X position of the element in AR.',
+                'inputMethod': 'textfield',
+                'type': 'bar',
+                'icon': 'communication:location-on',
+                'required': true,
+              },
+              {
+                'property': 'y',
+                'title': 'Y',
+                'description': 'Y position of the element in AR.',
+                'inputMethod': 'textfield',
+                'type': 'bar',
+                'icon': 'communication:location-on',
+                'required': true,
+              },
+              {
+                'property': 'z',
+                'title': 'Z',
+                'description': 'Z position of the element in AR.',
+                'inputMethod': 'textfield',
+                'type': 'bar',
+                'icon': 'communication:location-on',
+                'required': true,
+              },
+              {
+                'property': 'skyColor',
+                'title': 'Sky color',
+                'description': 'Select the color of the sky in the scene.',
+                'inputMethod': 'colorpicker',
+                'type': 'bar',
+                'icon': 'editor:format-color-fill',
+              },
+            ],
+            'advanced': []
+          }
         };
         this.setHaxProperties(props);
       },
       /**
        * Generate position object based on format a-frame expects.
        */
-      _computePosition: function (x, y, z) {
+      _computePosition: function (x, y, z, width, height) {
         return {
           x: x,
           y: y,
