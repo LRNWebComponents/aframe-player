@@ -19,13 +19,10 @@ A LRN element
         position: relative;
       }
     </style>
-    <a-scene embedded arjs$="[[ar]]" style$="height:[[height]];width:[[width]];">
+    <a-scene id="scene" class="embedded" embedded arjs$="[[ar]]" style$="height:[[height]];width:[[width]];">
       <a-sky color$="[[skyColor]]"></a-sky>
       <a-marker-camera preset="hiro"></a-marker-camera>
-      <a-assets>
-        <a-asset-item id="gltf" src$="[[source]]"></a-asset-item>
-      </a-assets>
-      <a-entity id="entity" gltf-model="#gltf" position="0 0 0"></a-entity>
+      <a-entity id="entity" gltf-model$="[[source]]" position="0 0 0"></a-entity>
     </a-scene>
   </template>
   <script>
@@ -100,9 +97,11 @@ A LRN element
         }
       },
       /**
-       * Ready.
+       * Attached.
        */
-      ready: function() {
+      attached: function () {
+        // ensure that this doesn't put full screen styles on the page!
+        this.$.scene.removeFullScreenStyles();
         let props = {
           'canScale': false,
           'canPosition': false,
@@ -113,19 +112,16 @@ A LRN element
             'icon': 'av:play-circle-filled',
             'color': 'amber',
             'groups': ['3D', 'Augmented reality'],
-            'handles': [
-              {
-                'type': '3d',
-                'source': 'source'
-              }
-            ],
+            'handles': [{
+              'type': '3d',
+              'source': 'source'
+            }],
             'meta': {
               'author': 'LRNWebComponents'
             }
           },
           'settings': {
-            'quick': [
-              {
+            'quick': [{
                 'property': 'height',
                 'title': 'height',
                 'description': 'height of the object',
@@ -144,8 +140,7 @@ A LRN element
                 'required': true,
               },
             ],
-            'configure': [
-              {
+            'configure': [{
                 'property': 'source',
                 'title': 'Source',
                 'description': 'The URL for this AR file.',
